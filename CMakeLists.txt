@@ -30,6 +30,7 @@ add_library(mercury
   src/index/index.cpp
   src/index/metadata_index.cpp
   src/index/timeline_index.cpp
+  src/metadata/metadata_validator.cpp
   src/parser/parser.cpp
   src/plugin/plugin.cpp
   src/query/query.cpp
