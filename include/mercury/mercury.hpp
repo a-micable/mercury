@@ -1,0 +1,120 @@
+#pragma once
+
+#include "mercury/core.hpp"
+
+#include <memory>
+#include <set>
+
+namespace mercury {
+
+class Parser {
+public:
+  virtual ~Parser() = default;
+  [[nodiscard]] virtual std::string_view name() const = 0;
+  [[nodiscard]] virtual bool can_parse(std::span<const std::uint8_t> bytes) const = 0;
+  [[nodiscard]] virtual Result<Recording> parse(std::span<const std::uint8_t> bytes) const = 0;
+};
+
+class ParserRegistry {
+public:
+  void register_parser(std::unique_ptr<Parser> parser);
+  [[nodiscard]] const Parser* detect(std::span<const std::uint8_t> bytes) const;
+  [[nodiscard]] Result<Recording> parse(std::span<const std::uint8_t> bytes) const;
+  [[nodiscard]] std::vector<std::string> names() const;
+
+private:
+  std::vector<std::unique_ptr<Parser>> parsers_;
+};
+
+ParserRegistry make_default_registry();
+
+class CompressionCodec {
+public:
+  virtual ~CompressionCodec() = default;
+  [[nodiscard]] virtual std::string_view name() const = 0;
+  [[nodiscard]] virtual Result<std::vector<std::uint8_t>> decompress(std::span<const std::uint8_t> bytes) const = 0;
+  [[nodiscard]] virtual Result<std::vector<std::uint8_t>> compress(std::span<const std::uint8_t> bytes) const = 0;
+};
+
+class CodecRegistry {
+public:
+  void register_codec(std::unique_ptr<CompressionCodec> codec);
+  [[nodiscard]] const CompressionCodec* find(std::string_view name) const;
+  [[nodiscard]] std::vector<std::string> names() const;
+
+private:
+  std::vector<std::unique_ptr<CompressionCodec>> codecs_;
+};
+
+CodecRegistry make_default_codecs();
+
+struct ArchiveMember {
+  std::string name;
+  std::uint64_t offset = 0;
+  std::uint64_t size = 0;
+  std::uint32_t checksum = 0;
+};
+
+class ArchiveReader {
+public:
+  [[nodiscard]] Result<std::vector<ArchiveMember>> scan(std::span<const std::uint8_t> bytes) const;
+  [[nodiscard]] Result<std::vector<std::uint8_t>> extract(std::span<const std::uint8_t> bytes, std::string_view name) const;
+};
+
+class ArchiveWriter {
+public:
+  void add(std::string name, std::vector<std::uint8_t> bytes);
+  [[nodiscard]] std::vector<std::uint8_t> finish() const;
+
+private:
+  std::vector<std::pair<std::string, std::vector<std::uint8_t>>> members_;
+};
+
+class IndexBuilder {
+public:
+  [[nodiscard]] std::vector<IndexEntry> build(const Recording& recording) const;
+};
+
+struct ReplayOptions {
+  double speed = 1.0;
+  std::set<std::uint16_t> stream_filter;
+  std::optional<std::uint64_t> begin_ns;
+  std::optional<std::uint64_t> end_ns;
+};
+
+class ReplayEngine {
+public:
+  using Callback = std::function<void(const TimelineEvent&, const Record&)>;
+  [[nodiscard]] std::vector<TimelineEvent> timeline(const Recording& recording, const ReplayOptions& options = {}) const;
+  Status replay(const Recording& recording, const ReplayOptions& options, Callback callback) const;
+};
+
+class Serializer {
+public:
+  [[nodiscard]] std::vector<std::uint8_t> write_recording(const Recording& recording) const;
+  [[nodiscard]] Result<Recording> read_recording(std::span<const std::uint8_t> bytes) const;
+};
+
+struct Config {
+  std::unordered_map<std::string, std::string> values;
+  [[nodiscard]] std::string get(std::string_view key, std::string fallback = {}) const;
+};
+
+class ConfigLoader {
+public:
+  [[nodiscard]] Result<Config> parse(std::string_view text) const;
+};
+
+class PluginHost {
+public:
+  void register_parser(std::unique_ptr<Parser> parser);
+  void register_codec(std::unique_ptr<CompressionCodec> codec);
+  [[nodiscard]] ParserRegistry& parsers();
+  [[nodiscard]] CodecRegistry& codecs();
+
+private:
+  ParserRegistry parsers_;
+  CodecRegistry codecs_;
+};
+
+} // namespace mercury
