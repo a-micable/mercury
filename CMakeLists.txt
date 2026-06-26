@@ -33,6 +33,7 @@ add_library(mercury
   src/plugin/plugin.cpp
   src/query/query.cpp
   src/replay/replay.cpp
+  src/routing/event_router.cpp
   src/serialization/serializer.cpp
 )
 
