@@ -29,6 +29,7 @@ add_library(mercury
   src/index/index.cpp
   src/parser/parser.cpp
   src/plugin/plugin.cpp
+  src/query/query.cpp
   src/replay/replay.cpp
   src/serialization/serializer.cpp
 )
@@ -61,6 +62,7 @@ if(MERCURY_BUILD_TESTS)
     tests/archive_tests.cpp
     tests/config_tests.cpp
     tests/parser_tests.cpp
+    tests/query_tests.cpp
     tests/replay_tests.cpp
     tests/serialization_tests.cpp
     tests/test_main.cpp

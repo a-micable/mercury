@@ -89,6 +89,30 @@ public:
   Status replay(const Recording& recording, const ReplayOptions& options, Callback callback) const;
 };
 
+struct RecordQuery {
+  std::set<std::uint16_t> streams;
+  std::set<RecordKind> kinds;
+  std::optional<std::uint64_t> begin_ns;
+  std::optional<std::uint64_t> end_ns;
+  std::optional<std::uint32_t> min_sequence;
+  std::optional<std::uint32_t> max_sequence;
+  std::map<std::string, std::string> metadata_equals;
+  std::vector<std::uint8_t> payload_contains;
+
+  [[nodiscard]] bool empty() const;
+};
+
+struct QueryResult {
+  std::size_t ordinal = 0;
+  const Record* record = nullptr;
+};
+
+class QueryEngine {
+public:
+  [[nodiscard]] bool matches(const Record& record, const RecordQuery& query) const;
+  [[nodiscard]] std::vector<QueryResult> search(const Recording& recording, const RecordQuery& query) const;
+};
+
 class Serializer {
 public:
   [[nodiscard]] std::vector<std::uint8_t> write_recording(const Recording& recording) const;
