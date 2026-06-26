@@ -19,6 +19,7 @@ add_library(mercury
   src/config/config.cpp
   src/core/binary.cpp
   src/core/checksum.cpp
+  src/core/diagnostics.cpp
   src/core/logging.cpp
   src/core/status.cpp
   src/formats/compact.cpp
