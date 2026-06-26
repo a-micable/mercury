@@ -129,6 +129,35 @@ struct TimelineEvent {
   std::string label;
 };
 
+enum class DiagnosticSeverity {
+  note,
+  warning,
+  error,
+};
+
+struct Diagnostic {
+  DiagnosticSeverity severity = DiagnosticSeverity::note;
+  ErrorCode code = ErrorCode::ok;
+  std::string component;
+  std::string message;
+  std::uint64_t offset = 0;
+};
+
+class DiagnosticCollector {
+public:
+  void add(Diagnostic diagnostic);
+  void note(std::string component, std::string message, std::uint64_t offset = 0);
+  void warning(ErrorCode code, std::string component, std::string message, std::uint64_t offset = 0);
+  void error(ErrorCode code, std::string component, std::string message, std::uint64_t offset = 0);
+  [[nodiscard]] bool has_errors() const;
+  [[nodiscard]] std::size_t size() const;
+  [[nodiscard]] const std::vector<Diagnostic>& entries() const;
+  void clear();
+
+private:
+  std::vector<Diagnostic> entries_;
+};
+
 std::uint32_t crc32(std::span<const std::uint8_t> bytes);
 std::uint64_t crc64_ecma(std::span<const std::uint8_t> bytes);
 std::uint32_t fnv1a32(std::span<const std::uint8_t> bytes);
@@ -137,6 +166,7 @@ std::string hex_digest(std::span<const std::uint8_t> bytes);
 
 std::string to_string(ErrorCode code);
 std::string to_string(RecordKind kind);
+std::string to_string(DiagnosticSeverity severity);
 RecordKind record_kind_from_wire(std::uint16_t value);
 
 class Logger {
