@@ -173,6 +173,38 @@ private:
   std::vector<MetadataHit> hits_;
 };
 
+enum class MetadataType {
+  string,
+  integer,
+  floating,
+  boolean,
+};
+
+struct MetadataRule {
+  std::string key;
+  MetadataType type = MetadataType::string;
+  bool required = false;
+  bool non_empty = false;
+};
+
+struct MetadataValidationIssue {
+  std::string key;
+  std::string message;
+  std::optional<std::size_t> record_ordinal;
+};
+
+class MetadataValidator {
+public:
+  void add_rule(MetadataRule rule);
+  [[nodiscard]] const std::vector<MetadataRule>& rules() const;
+  [[nodiscard]] std::vector<MetadataValidationIssue> validate_recording(const Recording& recording) const;
+  [[nodiscard]] std::vector<MetadataValidationIssue> validate_record(std::size_t ordinal, const Record& record) const;
+  void clear();
+
+private:
+  std::vector<MetadataRule> rules_;
+};
+
 class Serializer {
 public:
   [[nodiscard]] std::vector<std::uint8_t> write_recording(const Recording& recording) const;
