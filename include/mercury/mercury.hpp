@@ -127,6 +127,31 @@ public:
   [[nodiscard]] std::vector<QueryResult> search(const Recording& recording, const RecordQuery& query) const;
 };
 
+struct EventRoute {
+  std::string name;
+  RecordQuery query;
+  int priority = 0;
+  bool stop_after_match = false;
+};
+
+struct RoutedEvent {
+  std::string route_name;
+  std::size_t ordinal = 0;
+  const Record* record = nullptr;
+};
+
+class EventRouter {
+public:
+  Status add_route(EventRoute route);
+  [[nodiscard]] std::vector<EventRoute> routes() const;
+  [[nodiscard]] std::vector<RoutedEvent> route_record(std::size_t ordinal, const Record& record) const;
+  [[nodiscard]] std::vector<RoutedEvent> route_recording(const Recording& recording) const;
+  void clear();
+
+private:
+  std::vector<EventRoute> routes_;
+};
+
 struct MetadataHit {
   std::string key;
   std::string value;
