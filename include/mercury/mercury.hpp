@@ -113,6 +113,27 @@ public:
   [[nodiscard]] std::vector<QueryResult> search(const Recording& recording, const RecordQuery& query) const;
 };
 
+struct MetadataHit {
+  std::string key;
+  std::string value;
+  std::optional<std::size_t> record_ordinal;
+};
+
+class MetadataIndex {
+public:
+  void add_recording_metadata(const Metadata& metadata);
+  void add_record_metadata(std::size_t ordinal, const Metadata& metadata);
+  void build(const Recording& recording);
+  [[nodiscard]] std::vector<MetadataHit> find_key(std::string_view key) const;
+  [[nodiscard]] std::vector<MetadataHit> find_exact(std::string_view key, std::string_view value) const;
+  [[nodiscard]] std::vector<std::string> keys() const;
+  [[nodiscard]] std::size_t size() const;
+  void clear();
+
+private:
+  std::vector<MetadataHit> hits_;
+};
+
 class Serializer {
 public:
   [[nodiscard]] std::vector<std::uint8_t> write_recording(const Recording& recording) const;

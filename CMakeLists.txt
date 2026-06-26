@@ -27,6 +27,7 @@ add_library(mercury
   src/formats/mrf2.cpp
   src/formats/stream_capture.cpp
   src/index/index.cpp
+  src/index/metadata_index.cpp
   src/parser/parser.cpp
   src/plugin/plugin.cpp
   src/query/query.cpp
@@ -61,6 +62,7 @@ if(MERCURY_BUILD_TESTS)
   add_executable(mercury-tests
     tests/archive_tests.cpp
     tests/config_tests.cpp
+    tests/metadata_index_tests.cpp
     tests/parser_tests.cpp
     tests/query_tests.cpp
     tests/replay_tests.cpp

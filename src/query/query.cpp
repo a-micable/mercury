@@ -1,28 +1,12 @@
 #include "mercury/mercury.hpp"
 
+#include "metadata/metadata_values.hpp"
+
 #include <algorithm>
-#include <sstream>
 
 namespace mercury {
 
 namespace {
-
-std::string metadata_to_string(const MetadataValue& value) {
-  return std::visit(
-      [](const auto& item) -> std::string {
-        using T = std::decay_t<decltype(item)>;
-        if constexpr (std::is_same_v<T, std::string>) {
-          return item;
-        } else if constexpr (std::is_same_v<T, bool>) {
-          return item ? "true" : "false";
-        } else {
-          std::ostringstream out;
-          out << item;
-          return out.str();
-        }
-      },
-      value.value);
-}
 
 bool contains_payload(std::span<const std::uint8_t> payload, std::span<const std::uint8_t> needle) {
   if (needle.empty()) {
@@ -37,7 +21,7 @@ bool contains_payload(std::span<const std::uint8_t> payload, std::span<const std
 bool metadata_matches(const Metadata& metadata, const std::map<std::string, std::string>& expected) {
   for (const auto& [key, value] : expected) {
     const auto iter = metadata.find(key);
-    if (iter == metadata.end() || metadata_to_string(iter->second) != value) {
+    if (iter == metadata.end() || metadata::value_to_string(iter->second) != value) {
       return false;
     }
   }
