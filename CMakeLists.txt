@@ -28,6 +28,7 @@ add_library(mercury
   src/formats/stream_capture.cpp
   src/index/index.cpp
   src/index/metadata_index.cpp
+  src/index/timeline_index.cpp
   src/parser/parser.cpp
   src/plugin/plugin.cpp
   src/query/query.cpp
@@ -67,6 +68,7 @@ if(MERCURY_BUILD_TESTS)
     tests/query_tests.cpp
     tests/replay_tests.cpp
     tests/serialization_tests.cpp
+    tests/timeline_index_tests.cpp
     tests/test_main.cpp
   )
   target_link_libraries(mercury-tests PRIVATE mercury)

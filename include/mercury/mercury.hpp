@@ -75,6 +75,20 @@ public:
   [[nodiscard]] std::vector<IndexEntry> build(const Recording& recording) const;
 };
 
+class TimelineIndex {
+public:
+  void build(std::vector<IndexEntry> entries);
+  [[nodiscard]] std::vector<IndexEntry> range(std::uint64_t begin_ns, std::uint64_t end_ns) const;
+  [[nodiscard]] std::optional<IndexEntry> nearest_at_or_before(std::uint64_t timestamp_ns) const;
+  [[nodiscard]] std::optional<IndexEntry> nearest_at_or_after(std::uint64_t timestamp_ns) const;
+  [[nodiscard]] const std::vector<IndexEntry>& entries() const;
+  [[nodiscard]] bool empty() const;
+  void clear();
+
+private:
+  std::vector<IndexEntry> entries_;
+};
+
 struct ReplayOptions {
   double speed = 1.0;
   std::set<std::uint16_t> stream_filter;
