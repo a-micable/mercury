@@ -65,6 +65,7 @@ if(MERCURY_BUILD_TESTS)
   add_executable(mercury-tests
     tests/archive_tests.cpp
     tests/config_tests.cpp
+    tests/diagnostics_tests.cpp
     tests/event_router_tests.cpp
     tests/metadata_index_tests.cpp
     tests/parser_tests.cpp
