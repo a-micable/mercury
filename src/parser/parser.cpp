@@ -7,6 +7,16 @@
 namespace mercury {
 
 void ParserRegistry::register_parser(std::unique_ptr<Parser> parser) {
+  if (!parser) {
+    return;
+  }
+  const auto duplicate = std::find_if(
+      parsers_.begin(), parsers_.end(), [&](const auto& registered) {
+        return registered->name() == parser->name();
+      });
+  if (duplicate != parsers_.end()) {
+    return;
+  }
   parsers_.push_back(std::move(parser));
 }
 

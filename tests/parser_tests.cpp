@@ -2,6 +2,36 @@
 
 namespace {
 
+class TestParser final : public mercury::Parser {
+public:
+  explicit TestParser(std::string parser_name) : name_(std::move(parser_name)) {}
+
+  std::string_view name() const override { return name_; }
+  bool can_parse(std::span<const std::uint8_t>) const override { return false; }
+  mercury::Result<mercury::Recording> parse(
+      std::span<const std::uint8_t>) const override {
+    return mercury::Status(mercury::ErrorCode::unknown_format,
+                            "test parser does not parse input");
+  }
+
+private:
+  std::string name_;
+};
+
+const mercury::test::Register parser_registry_ignores_null_and_duplicates(
+    "parser registry ignores null and duplicate registrations", [] {
+      mercury::ParserRegistry registry;
+      registry.register_parser(nullptr);
+      registry.register_parser(std::make_unique<TestParser>("custom"));
+      registry.register_parser(std::make_unique<TestParser>("custom"));
+
+      const auto names = registry.names();
+      mercury::test::require(names.size() == 1,
+                             "registry should contain one unique parser");
+      mercury::test::require(names.front() == "custom",
+                             "registry should preserve the first parser");
+    });
+
 const mercury::test::Register parser_roundtrip("parser roundtrip", [] {
   auto bytes = mercury::Serializer().write_recording(mercury::test::fixture_recording());
   auto parsed = mercury::make_default_registry().parse(bytes);

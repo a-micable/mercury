@@ -30,6 +30,8 @@ Mercury treats binary recorder files as evidence. A recording is not just a byte
 - Binary serializer/deserializer for normalized recording fixtures.
 - Configuration parser for simple operational profiles.
 - Plugin host for registering external parsers and codecs.
+- Tenant-scoped filesystem storage with atomic publication, validated listings,
+  and path-safe recording identifiers.
 - CLI suite for inspection, verification, indexing, replay, conversion, export, and benchmarking.
 - Unit tests, regression fixtures, fuzz targets, seed corpora, and ClusterFuzzLite configuration.
 
@@ -45,6 +47,7 @@ src/codecs/            Pluggable compression codecs
 src/index/             Random-access index construction
 src/replay/            Timeline reconstruction and replay callbacks
 src/serialization/     Normalized binary serialization helpers
+src/storage/           Tenant-scoped durable recording store
 src/config/            Configuration language parser
 src/plugin/            Parser and codec plugin host
 tools/                 Command-line utilities

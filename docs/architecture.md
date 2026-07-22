@@ -10,6 +10,20 @@ Mercury is organized around a small set of stable library contracts.
 
 `ArchiveWriter` emits deterministic Mercury bundles with a table of contents and CRC32 per member. `ArchiveReader` validates member offsets and checksums before extraction.
 
+## Tenant-Scoped Storage
+
+`RecordingStore` is the first operational boundary above the in-memory library. A store is configured with a filesystem root and tenant identifier; each tenant receives an isolated directory containing validated `.mrf` objects. Recording identifiers are restricted to path-safe components, so callers cannot escape the tenant directory.
+
+Writes serialize the normalized recording to a temporary file and publish it with a filesystem rename. Readers parse the published bytes through the normal parser registry, and listings re-validate each object before returning a `RecordingSummary`. This keeps corrupt or hand-edited files from silently entering operational listings. The storage API is transport-neutral so a later object-store adapter can preserve the same tenant and recording contracts.
+
+The `mercury-store` command exposes the initial operator workflow:
+
+```text
+mercury-store <root> <tenant> list
+mercury-store <root> <tenant> put <id> <recording>
+mercury-store <root> <tenant> remove <id>
+```
+
 ## Integrity
 
 The core library exposes small deterministic integrity primitives used by parsers, archives, and command-line verification. CRC32 remains the fast per-record checksum, CRC64-ECMA is available for wider archive and transport manifests, and SHA-256 provides a stable content digest for offline audit trails and regression fixtures. The implementations are internal and dependency-free so Mercury can run in restricted recovery environments.

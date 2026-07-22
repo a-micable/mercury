@@ -154,6 +154,45 @@ public:
                                           const RecordingAnalysisOptions& options = {}) const;
 };
 
+enum class RecoveryIssueKind {
+  skipped_prefix,
+  invalid_version,
+  malformed_metadata,
+  malformed_record_header,
+  payload_too_large,
+  truncated_payload,
+  checksum_mismatch,
+  trailing_bytes,
+};
+
+struct RecoveryIssue {
+  RecoveryIssueKind kind = RecoveryIssueKind::trailing_bytes;
+  ErrorCode code = ErrorCode::ok;
+  std::uint64_t offset = 0;
+  std::string message;
+};
+
+struct RecoveryOptions {
+  std::uint32_t max_records = 1'000'000;
+  std::uint32_t max_payload_bytes = 64 * 1024 * 1024;
+  bool keep_checksum_failures = false;
+};
+
+struct RecoveryResult {
+  Recording recording;
+  std::vector<RecoveryIssue> issues;
+  std::uint64_t bytes_consumed = 0;
+
+  [[nodiscard]] bool recovered_anything() const;
+  [[nodiscard]] bool clean() const;
+};
+
+class RecoveryScanner {
+public:
+  [[nodiscard]] RecoveryResult recover(std::span<const std::uint8_t> bytes,
+                                       const RecoveryOptions& options = {}) const;
+};
+
 struct RecordQuery {
   std::set<std::uint16_t> streams;
   std::set<RecordKind> kinds;
@@ -260,6 +299,35 @@ class Serializer {
 public:
   [[nodiscard]] std::vector<std::uint8_t> write_recording(const Recording& recording) const;
   [[nodiscard]] Result<Recording> read_recording(std::span<const std::uint8_t> bytes) const;
+};
+
+struct RecordingSummary {
+  std::string tenant;
+  std::string id;
+  std::string format;
+  std::uint16_t version = 0;
+  std::size_t records = 0;
+  std::size_t payload_bytes = 0;
+  std::uint64_t serialized_bytes = 0;
+};
+
+class RecordingStore {
+public:
+  RecordingStore(std::filesystem::path root, std::string tenant);
+
+  [[nodiscard]] Status initialize() const;
+  [[nodiscard]] Status put(std::string_view id, const Recording& recording) const;
+  [[nodiscard]] Result<Recording> get(std::string_view id) const;
+  [[nodiscard]] Result<std::vector<RecordingSummary>> list() const;
+  [[nodiscard]] Status erase(std::string_view id) const;
+
+private:
+  [[nodiscard]] Result<std::filesystem::path> path_for(std::string_view id) const;
+  [[nodiscard]] Result<RecordingSummary> summarize(
+      std::string_view id, std::span<const std::uint8_t> bytes) const;
+
+  std::filesystem::path root_;
+  std::string tenant_;
 };
 
 struct Config {

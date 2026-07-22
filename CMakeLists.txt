@@ -35,9 +35,11 @@ add_library(mercury
   src/parser/parser.cpp
   src/plugin/plugin.cpp
   src/query/query.cpp
+  src/recovery/recovery_scanner.cpp
   src/replay/replay.cpp
   src/routing/event_router.cpp
   src/serialization/serializer.cpp
+  src/storage/recording_store.cpp
 )
 
 target_include_directories(mercury PUBLIC include PRIVATE src)
@@ -63,6 +65,8 @@ mercury_tool(mercury-convert tools/mercury_convert.cpp)
 mercury_tool(mercury-benchmark tools/mercury_benchmark.cpp)
 mercury_tool(mercury-stats tools/mercury_stats.cpp)
 mercury_tool(mercury-analyze tools/mercury_analyze.cpp)
+mercury_tool(mercury-recover tools/mercury_recover.cpp)
+mercury_tool(mercury-store tools/mercury_store.cpp)
 
 if(MERCURY_BUILD_TESTS)
   enable_testing()
@@ -73,10 +77,13 @@ if(MERCURY_BUILD_TESTS)
     tests/diagnostics_tests.cpp
     tests/event_router_tests.cpp
     tests/metadata_index_tests.cpp
+    tests/metadata_validator_tests.cpp
     tests/parser_tests.cpp
     tests/query_tests.cpp
+    tests/recovery_scanner_tests.cpp
     tests/replay_tests.cpp
     tests/serialization_tests.cpp
+    tests/storage_tests.cpp
     tests/timeline_index_tests.cpp
     tests/test_main.cpp
   )
