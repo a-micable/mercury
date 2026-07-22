@@ -14,6 +14,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_library(mercury
+  src/analysis/recording_analyzer.cpp
   src/archive/archive.cpp
   src/codecs/compression.cpp
   src/config/config.cpp
@@ -60,11 +61,14 @@ mercury_tool(mercury-replay tools/mercury_replay.cpp)
 mercury_tool(mercury-export tools/mercury_export.cpp)
 mercury_tool(mercury-convert tools/mercury_convert.cpp)
 mercury_tool(mercury-benchmark tools/mercury_benchmark.cpp)
+mercury_tool(mercury-stats tools/mercury_stats.cpp)
+mercury_tool(mercury-analyze tools/mercury_analyze.cpp)
 
 if(MERCURY_BUILD_TESTS)
   enable_testing()
   add_executable(mercury-tests
     tests/archive_tests.cpp
+    tests/recording_analyzer_tests.cpp
     tests/config_tests.cpp
     tests/diagnostics_tests.cpp
     tests/event_router_tests.cpp

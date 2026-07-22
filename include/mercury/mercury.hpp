@@ -103,6 +103,57 @@ public:
   Status replay(const Recording& recording, const ReplayOptions& options, Callback callback) const;
 };
 
+struct SequenceGap {
+  std::uint16_t stream_id = 0;
+  std::uint32_t expected_sequence = 0;
+  std::uint32_t observed_sequence = 0;
+  std::size_t record_ordinal = 0;
+};
+
+struct TimelineGap {
+  std::uint16_t stream_id = 0;
+  std::uint64_t previous_timestamp_ns = 0;
+  std::uint64_t current_timestamp_ns = 0;
+  std::uint64_t delta_ns = 0;
+  std::size_t record_ordinal = 0;
+};
+
+struct StreamSummary {
+  std::uint16_t stream_id = 0;
+  std::size_t records = 0;
+  std::size_t payload_bytes = 0;
+  std::uint64_t first_timestamp_ns = 0;
+  std::uint64_t last_timestamp_ns = 0;
+  std::uint32_t first_sequence = 0;
+  std::uint32_t last_sequence = 0;
+  bool timestamps_monotonic = true;
+  bool sequences_contiguous = true;
+};
+
+struct RecordingAnalysis {
+  std::size_t records = 0;
+  std::size_t payload_bytes = 0;
+  std::uint64_t first_timestamp_ns = 0;
+  std::uint64_t last_timestamp_ns = 0;
+  std::map<RecordKind, std::size_t> records_by_kind;
+  std::vector<StreamSummary> streams;
+  std::vector<SequenceGap> sequence_gaps;
+  std::vector<TimelineGap> timeline_gaps;
+  std::vector<std::string> warnings;
+};
+
+struct RecordingAnalysisOptions {
+  std::optional<std::uint64_t> timeline_gap_threshold_ns;
+  bool require_contiguous_sequences = true;
+  bool require_monotonic_stream_timestamps = true;
+};
+
+class RecordingAnalyzer {
+public:
+  [[nodiscard]] RecordingAnalysis analyze(const Recording& recording,
+                                          const RecordingAnalysisOptions& options = {}) const;
+};
+
 struct RecordQuery {
   std::set<std::uint16_t> streams;
   std::set<RecordKind> kinds;
